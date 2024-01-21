@@ -62,6 +62,7 @@ namespace WeaponRestricter
         {
             try
             {
+                _data_restricted.Clear();
                 List<string> failed = new();
                 JsonSerializerOptions options = new()
                 {

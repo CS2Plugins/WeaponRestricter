@@ -10,7 +10,7 @@ namespace WeaponRestricter
     {
         public override string ModuleName => "WeaponRestrictPlugin";
 
-        public override string ModuleVersion => "1.0.1";
+        public override string ModuleVersion => "1.0.2";
 
         public override string ModuleAuthor => "FireBird";
 
@@ -33,7 +33,6 @@ namespace WeaponRestricter
 
             e.Userid.InGameMoneyServices!.Account += wep.price;
             e.Userid.PrintToChat(ChatMessage($"{ChatColors.DarkBlue} Refunded {ChatColors.Lime}${wep.price}"));
-
         Skip:
             return HookResult.Continue;
         }
@@ -46,6 +45,7 @@ namespace WeaponRestricter
 
             // Weapon is pickable
             PickableResult res = IsPickable(wep, e.Userid.Team);
+            //e.Userid.PrintToChat($"Wep_Limit: {wep.limit} | Res_Limit: {res.limit} | Res_Count: {res.count} | Res_Pickable: {res.pickable}");
             if (res.pickable) goto Skip;
 
             foreach (var weapon in e.Userid.PlayerPawn.Value!.WeaponServices!.MyWeapons)
