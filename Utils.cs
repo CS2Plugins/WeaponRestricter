@@ -1,13 +1,15 @@
-﻿using System.Text.Json;
-using CounterStrikeSharp.API.Modules.Entities.Constants;
+﻿using CounterStrikeSharp.API.Modules.Entities.Constants;
+using CounterStrikeSharp.API.Modules.Utils;
+using System.Text.Json;
 using static WeaponRestricter.Types;
 
 namespace WeaponRestricter
 {
     internal class Utils
     {
+        // Base weapon data
         // Credits to Quake1011 for the data (https://github.com/Quake1011/Weapon-Restrict/blob/main/src/MetaData.cs)
-        private static List<Types.Weapon> _data_all = new()
+        private static readonly List<Weapon> _data_base = new()
         {
             new((long)ItemDefinition.M4A4, "M4A1", "weapon_m4a1", 3100),
             new((long)ItemDefinition.M4A1_S, "M4A1-S", "weapon_m4a1_silencer", 2900),
@@ -52,9 +54,11 @@ namespace WeaponRestricter
             new((long)ItemDefinition.DECOY_GRENADE, "Decoy Grenade", "weapon_decoy", 50)
         };
 
-        internal static List<Types.RestrictedWeapon> _data_restricted = new();
+        // Restricted weapon data loaded from cfg
+        internal static List<Weapon> _data_restricted = new();
 
-        internal static void LoadConfig()
+        // Load weapon restricts from config
+        internal static void LoadConfig(string moduleDir)
         {
             try
             {
@@ -64,51 +68,78 @@ namespace WeaponRestricter
                     ReadCommentHandling = JsonCommentHandling.Skip
                 };
 
-                var config = JsonSerializer.Deserialize<Dictionary<string, int>>(File.ReadAllText("config.json"), options) ?? throw new Exception("Failed to Read");
+                // Create config file if doesnt already exist
+                var configPath = Path.Join(moduleDir, "config.json");
+                if (!File.Exists(configPath)) File.Create(configPath);
+
+                // Read the config file and Deserialize it while ignoring comments
+                var config = JsonSerializer.Deserialize<Dictionary<string, int>>(File.ReadAllText(configPath), options) ?? throw new Exception("Failed to Read");
                 foreach (var weapon in config)
                 {
-                    Types.Weapon? configWeapon = FindWeaponByName(weapon.Key);
+                    string _name = weapon.Key;
+                    int _limit = weapon.Value;
+                    // Get weapon data by name
+                    Weapon? configWeapon = FindWeaponByName(_name, _data_base);
                     if (configWeapon == null)
                     {
-                        failed.Add(weapon.Key);
+                        // Weapon name was incorrect in config continue to next
+                        failed.Add(_name);
                         continue;
                     }
-                    _data_restricted.Add(new(configWeapon, 5));
-                }
 
-                if (failed.Count == 0) return;
-                for (int i = 0; i < 5; i++)
-                {
-                    LogSpam("WARN", $"Failed to load {string.Join(", ", failed)} | Weapon name incorrect");
+                    // Prevent divide by 0 crashes later
+                    if (_limit == 0) _limit = 1;
+
+                    // Add the weapon to the restricted list
+                    _data_restricted.Add(new(configWeapon, _limit));
+                    Log($"Loaded config for {_name} with value of: {_limit}");
                 }
+                if (failed.Count == 0) return;
+
+                // Log any incorrect config names/values
+                LogSpam("WARN", $"Failed to load {string.Join(", ", failed)} | Weapon name incorrect", 5);
             }
             catch (Exception e)
             {
-                for (int i = 0; i < 5; i++)
-                {
-                    LogSpam("ERROR", $"Failed to load Config | Reason: {e.Message}");
-                }
+                LogSpam("ERROR", $"Failed to load Config | Reason: {e.Message}", 5);
             }
         }
 
-        internal static Weapon? FindWeaponByName(string name)
+        // Get Chat printable message
+        internal static string ChatMessage(string message)
         {
-            return _data_all.FirstOrDefault(w => w.designer_name == name) ?? _data_all.FirstOrDefault(w => w.name == name);
+            return $"game{ChatColors.Lime}sense {ChatColors.White}» {message}";
         }
 
+        // Regular log
         internal static void Log(string message)
         {
-            Console.WriteLine($"WeaponRestrict - {message}");
+            Console.WriteLine($"WeaponRestricter - {message}");
         }
 
         // Multiline log so its easier to spot in console
-        internal static void LogSpam(string prefix, string message)
+        internal static void LogSpam(string prefix, string message, int count)
         {
-            Console.WriteLine(" ");
-            Console.WriteLine("#####################################");
-            Console.WriteLine($"{prefix}: WeaponRestrict - {message}");
-            Console.WriteLine("#####################################");
-            Console.WriteLine(" ");
+            for (int i = 0; i < count; i++)
+            {
+                Console.WriteLine(" ");
+                Console.WriteLine("#####################################");
+                Console.WriteLine($"{prefix}: WeaponRestricter - {message}");
+                Console.WriteLine("#####################################");
+                Console.WriteLine(" ");
+            }
+        }
+
+        // Get weapon by designer_name or name
+        internal static Weapon? FindWeaponByName(string name, List<Weapon> list)
+        {
+            return list.FirstOrDefault(w => w.designer_name == name) ?? list.FirstOrDefault(w => w.name == name);
+        }
+
+        // Get weapon by index
+        internal static Weapon? FindWeaponByIndex(long index, List<Weapon> list)
+        {
+            return list.FirstOrDefault(w => w.def == index);
         }
     }
 }

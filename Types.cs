@@ -8,6 +8,7 @@
             internal readonly string name;
             internal readonly string designer_name;
             internal readonly int price;
+            internal readonly int limit;
 
             internal Weapon(long def, string name, string designer_name, int price)
             {
@@ -15,18 +16,30 @@
                 this.name = name;
                 this.designer_name = designer_name;
                 this.price = price;
+                limit = -1;
+            }
+
+            internal Weapon(Weapon w, int limit)
+            {
+                def = w.def;
+                name = w.name;
+                designer_name = w.designer_name;
+                price = w.price;
+                this.limit = limit;
             }
         }
 
-        internal class RestrictedWeapon : Weapon
+        internal readonly struct PickableResult
         {
-            // -1 = fully restricted
-            // 0 or Weapon not in cfg = unrestricted
             internal readonly int limit;
+            internal readonly int count;
+            internal readonly bool pickable;
 
-            internal RestrictedWeapon(Weapon w, int limit) : base(w.def, w.name, w.designer_name, w.price)
+            internal PickableResult(int limit, int count)
             {
                 this.limit = limit;
+                this.count = count;
+                pickable = limit >= count;
             }
         }
     }
