@@ -1,0 +1,9 @@
+{
+  // Example: "weapon_awp": 2
+  // "weapon_awp" is the weapon name, optionally a friendlier name such as "AWP" can also be used.
+  // 2 is the number of players (i.e for every 2 players allow 1 weapon)
+  // So, if 4 players are in the server, 2 awps per team will be allowed.
+  // Why this way? cause JON is a cunt.
+  "weapon_awp": 6,
+  "weapon_ssg08": 2
+}
