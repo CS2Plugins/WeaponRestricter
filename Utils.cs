@@ -79,7 +79,7 @@ namespace WeaponRestricter
                     string _name = weapon.Key;
                     int _limit = weapon.Value;
                     // Get weapon data by name
-                    Weapon? configWeapon = FindWeaponByName(_name, _data_base);
+                    Weapon? configWeapon = Functions.FindWeaponByName(_name, _data_base);
                     if (configWeapon == null)
                     {
                         // Weapon name was incorrect in config continue to next
@@ -128,18 +128,6 @@ namespace WeaponRestricter
                 Console.WriteLine("#####################################");
                 Console.WriteLine(" ");
             }
-        }
-
-        // Get weapon by designer_name or name
-        internal static Weapon? FindWeaponByName(string name, List<Weapon> list)
-        {
-            return list.FirstOrDefault(w => w.designer_name == name) ?? list.FirstOrDefault(w => w.name == name);
-        }
-
-        // Get weapon by index
-        internal static Weapon? FindWeaponByIndex(long index, List<Weapon> list)
-        {
-            return list.FirstOrDefault(w => w.def == index);
         }
     }
 }
