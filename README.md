@@ -1,7 +1,10 @@
+# Build
+You can either choose to compile the plugin yourself or find the latest build **[here](https://github.com/CS2Plugins/WeaponRestricter/tree/main/bin/Release/net7.0)**
+
 # Config
 The config is in JSON format. You can specify rules in a key-value pair style.
 
-The `key` is the weapon name which can be found [here](https://github.com/CS2Plugins/WeaponRestricter/blob/main/Utils.cs#L30).
+The `key` is the weapon name which can be found **[here](https://github.com/CS2Plugins/WeaponRestricter/blob/main/Utils.cs#L30)**
 It can either be `weapon_name` or the normal name. For Example: `weapon_awp` & `AWP`
 
 The `value` is the number of players present on the server to allow **1** of the weapon for each team.
